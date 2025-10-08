@@ -31,6 +31,10 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   data_integration_project:
-    # Config indicated by + and applies to all files under models/example/
-    example:
+    raw:
+      +schema: raw
+      +materialized: table
+    analytics:
+      +schema: analytics
       +materialized: view
+
