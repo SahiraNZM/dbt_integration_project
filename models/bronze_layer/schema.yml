@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: erp
+    database: ECOMMERCE_DB
+    schema: RAW_RAW
+    tables:
+      - name: CUST_AZ12
+      - name: LOC_A101
+      - name: PX_CAT_G1V2
+
+  - name: crm
+    database: ECOMMERCE_DB
+    schema: RAW_RAW
+    tables:
+      - name: cust_info
+      - name: prd_info
+      - name: sales_details
