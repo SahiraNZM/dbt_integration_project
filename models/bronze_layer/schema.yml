@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: erp
     database: ECOMMERCE_DB
-    schema: RAW_RAW
+    schema: RAW
     tables:
       - name: CUST_AZ12
       - name: LOC_A101
@@ -11,7 +11,7 @@ sources:
 
   - name: crm
     database: ECOMMERCE_DB
-    schema: RAW_RAW
+    schema: RAW
     tables:
       - name: cust_info
       - name: prd_info

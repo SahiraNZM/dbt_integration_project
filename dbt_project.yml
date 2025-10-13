@@ -38,11 +38,11 @@ models:
 
     silver:
       +schema: staging
-      +materialized: table
+      +materialized: view
 
     analytics:
       +schema: analytics
-      +materialized: view
+      +materialized: table
 
     reporting:
       +schema: reporting
