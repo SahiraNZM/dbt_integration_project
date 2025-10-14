@@ -1,4 +1,4 @@
-{{ config(materialized='view') }}
+{{ config(materialized='table') }}
 
 -- Step 1: Clean and deduplicate sales data
 WITH ranked AS (

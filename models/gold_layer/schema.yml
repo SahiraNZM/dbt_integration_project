@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: fact_sales
+    description: "Gold layer fact table combining sales, products, categories, and customers"
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: ['SLS_ORDER_NUM', 'SLS_PRD_KEY']
+      - not_null:
+          arguments:
+            column_name: SLS_ORDER_NUM
+      - relationships:
+          arguments:
+            column_name: SLS_CUST_ID
+            to: ref('stg_cust_info')
+            field: CST_ID

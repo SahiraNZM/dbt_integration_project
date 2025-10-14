@@ -1,4 +1,4 @@
-{{ config(materialized='view') }}
+{{ config(materialized='table') }}
 
 -- Step 1: Deduplicate and clean location data
 WITH ranked AS (
