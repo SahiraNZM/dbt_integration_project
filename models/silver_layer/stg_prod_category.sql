@@ -1,28 +1,23 @@
 {{ config(materialized='table') }}
 
--- Step 1: Deduplicate and clean product category data
-WITH ranked AS (
+-- Step 1: Deduplicate product category data
+WITH deduped AS (
+    {{ remove_duplicates(ref('prod_category'), 'ID', 'ID') }}
+),
+
+-- Step 2: Clean and standardize fields
+cleaned AS (
     SELECT
         ID,
-        INITCAP(TRIM(CAT)) AS CAT,                -- Standardize Category text
-        INITCAP(TRIM(SUBCAT)) AS SUBCAT,          -- Standardize Subcategory text
-        UPPER(TRIM(MAINTENANCE)) AS MAINTENANCE,  -- Make maintenance flag consistent (YES/NO)
-        ROW_NUMBER() OVER (
-            PARTITION BY ID
-            ORDER BY ID
-        ) AS row_num
-    FROM {{ ref('prod_category') }}
+        {{ standardize_text_case('CAT') }} AS CAT,
+        {{ standardize_text_case('SUBCAT') }} AS SUBCAT,
+        {{ standardize_maintenance_flag('MAINTENANCE') }} AS MAINTENANCE
+    FROM deduped
+    WHERE ID IS NOT NULL
 )
 
--- Step 2: Keep only unique and valid records
-SELECT
-    ID,
-    CAT,
-    SUBCAT,
-    MAINTENANCE
-FROM ranked
-WHERE row_num = 1
-  AND ID IS NOT NULL
-  AND CAT IS NOT NULL
+-- Step 3: Final select
+SELECT * FROM cleaned
+WHERE CAT IS NOT NULL
   AND SUBCAT IS NOT NULL
   AND MAINTENANCE IS NOT NULL

@@ -1,25 +1,16 @@
 {{ config(materialized='table') }}
 
--- Step 1: Deduplicate and clean personal data
-WITH ranked AS (
-    SELECT
-        CID,
-        TRY_TO_DATE(BDATE::STRING, 'YYYYMMDD') AS BDATE,  -- convert text to date
-        INITCAP(TRIM(GEN)) AS GEN,                  -- format gender text cleanly
-        ROW_NUMBER() OVER (
-            PARTITION BY CID
-            ORDER BY TRY_TO_DATE(BDATE::STRING, 'YYYYMMDD') DESC
-        ) AS row_num
-    FROM {{ ref('cust_personal') }}
+-- Step 1: Deduplicate using the macro
+WITH deduped AS (
+    {{ remove_duplicates(ref('cust_personal'), 'CID', 'BDATE') }}
 )
 
--- Step 2: Keep only unique and valid records
+-- Step 2: Filter out null values
 SELECT
     CID,
     BDATE,
-    GEN
-FROM ranked
-WHERE row_num = 1
-  AND CID IS NOT NULL
+    GEN AS GENDER
+FROM deduped
+WHERE CID IS NOT NULL
   AND BDATE IS NOT NULL
   AND GEN IS NOT NULL
