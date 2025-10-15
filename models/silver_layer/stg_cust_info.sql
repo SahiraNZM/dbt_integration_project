@@ -1,26 +1,16 @@
 {{ config(materialized='table') }}
 
-WITH ranked AS (
-  SELECT 
-    CST_ID,
-    CST_KEY,
-    CST_FIRSTNAME,
-    CST_LASTNAME,
-    CST_MARITAL_STATUS,
-    CST_GNDR,
-    CST_CREATE_DATE,
-    ROW_NUMBER() OVER (PARTITION BY CST_ID ORDER BY CST_CREATE_DATE DESC) AS row_num
-  FROM {{ ref('cust_details') }}
+with deduped as (
+    {{ remove_duplicates(ref('cust_details'), 'CST_ID', 'CST_ID') }}
+),
+
+cleaned as (
+    select CST_ID,
+        {{ handle_nulls_and_dashes('CST_LASTNAME') }} as Customer_Lastname,
+        {{ handle_nulls_and_dashes('CST_FIRSTNAME') }} as Customer_Firstname,
+        {{ standardize_gender('CST_GNDR') }} as Gender,
+        {{ standardize_marital_status('CST_MARITAL_STATUS') }} as Marital_Status
+    from deduped
 )
 
-SELECT 
-  CST_ID,
-  CST_KEY,
-  CST_FIRSTNAME,
-  CST_LASTNAME,
-  CST_MARITAL_STATUS,
-  CST_GNDR,
-  CST_CREATE_DATE
-FROM ranked
-WHERE row_num = 1
-  AND CST_ID IS NOT NULL
+select * from cleaned

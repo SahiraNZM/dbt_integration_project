@@ -1,5 +1,5 @@
 name: 'data_integration_project'
-version: '1.0.0'
+version: '1.3.1'
 
 profile: 'data_integration_project'
 
@@ -16,13 +16,13 @@ clean-targets:
 
 models:
   data_integration_project:
-    bronze:
+    bronze_layer:
       +schema: raw
       +materialized: table
 
-    silver:
-      +schema: staging
-      +materialized: view
+    silver_layer:
+      +schema: raw
+      +materialized: table
 
     analytics:
       +schema: analytics
@@ -34,5 +34,5 @@ models:
 
 seeds:
   data_integration_project:
-    +schema: raw
+    +schema: 
     +quote_columns: false
