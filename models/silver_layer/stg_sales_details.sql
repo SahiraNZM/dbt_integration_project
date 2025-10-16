@@ -12,17 +12,17 @@ WITH deduped AS (
 -- Step 2: Clean, convert, and standardize
 cleaned AS (
     SELECT
-        trim(SLS_ORD_NUM)              AS SLS_ORD_NUM,
-        trim(SLS_PRD_KEY)              AS SLS_PRD_KEY,
-        TRY_TO_NUMBER(SLS_CUST_ID)     AS SLS_CUST_ID,
+        trim(SLS_ORD_NUM)  AS SLS_ORD_NUM,
+        trim(SLS_PRD_KEY)  AS SLS_PRD_KEY,
+        {{ safe_to_number('SLS_CUST_ID') }} AS SLS_CUST_ID,
 
-        TRY_TO_DATE(SLS_ORDER_DT::STRING, 'YYYYMMDD') AS SLS_ORDER_DT,
-        TRY_TO_DATE(SLS_SHIP_DT::STRING, 'YYYYMMDD')  AS SLS_SHIP_DT,
-        TRY_TO_DATE(SLS_DUE_DT::STRING,  'YYYYMMDD')  AS SLS_DUE_DT,
+        {{ safe_to_date('SLS_ORDER_DT::STRING') }} AS SLS_ORDER_DT,
+        {{ safe_to_date('SLS_SHIP_DT::STRING') }}  AS SLS_SHIP_DT,
+        {{ safe_to_date('SLS_DUE_DT::STRING') }}   AS SLS_DUE_DT,
 
-        TRY_TO_NUMBER(SLS_SALES)     AS SLS_SALES,
-        TRY_TO_NUMBER(SLS_QUANTITY)  AS SLS_QUANTITY,
-        TRY_TO_NUMBER(SLS_PRICE)     AS SLS_PRICE
+        {{ safe_to_number('SLS_SALES') }}    AS SLS_SALES,
+        {{ safe_to_number('SLS_QUANTITY') }} AS SLS_QUANTITY,
+        {{ safe_to_number('SLS_PRICE') }}    AS SLS_PRICE
     FROM deduped
 )
 

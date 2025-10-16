@@ -1,38 +1,52 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized = 'view',
+    tags = ['gold', 'customer']
+) }}
 
+-- Create unified customer dimension view
 with info as (
     select
-        cst_id as customer_id,
+        cst_id,
         customer_firstname,
         customer_lastname,
-        gender,
+        gender as info_gender,
         marital_status
     from {{ ref('stg_cust_info') }}
 ),
 
 personal as (
     select
-        REGEXP_REPLACE(cid, '[^0-9]', '') as customer_id,
-        bdate as birth_date,
+        cid,
+        bdate,
         gender as personal_gender
     from {{ ref('stg_cust_personal') }}
 ),
 
 loc as (
     select
-        REGEXP_REPLACE(cid, '[^0-9]', '') as customer_id,
-        "TRIM(CNTRY)" as country
+        "CID" as cid,
+        "COUNTRY" as country
     from {{ ref('stg_cust_loc') }}
 )
 
 select
-    i.customer_id,
-    i.customer_firstname,
-    i.customer_lastname,
-    coalesce(i.gender, p.personal_gender, 'Unknown') as gender,
+    row_number() over (order by i.cst_id) as customer_key,  -- surrogate key
+    i.cst_id as customer_id,
+    i.customer_firstname as first_name,
+    i.customer_lastname as last_name,
+    
+    -- Prefer gender from info, else fallback to personal
+    case
+        when i.info_gender is not null and i.info_gender not in ('', 'Unknown')
+            then i.info_gender
+        else coalesce(p.personal_gender, 'Unknown')
+    end as gender,
+
     i.marital_status,
-    p.birth_date,
+    p.bdate as birthdate,
     l.country
 from info i
-left join personal p on REGEXP_REPLACE(i.customer_id, '[^0-9]', '') = p.customer_id
-left join loc l on REGEXP_REPLACE(i.customer_id, '[^0-9]', '') = l.customer_id
+left join personal p
+    on lower(i.cst_id) = lower(p.cid)  -- only if patterns match
+left join loc l
+    on lower(i.cst_id) = lower(l.cid)
