@@ -7,7 +7,7 @@ with deduped as (
 cleaned as (
     select
         CID,
-        {{ trim_name(CNTRY) }} as COUNTRY
+        {{ trim_name('CNTRY') }} as COUNTRY
     from deduped
 )
 
