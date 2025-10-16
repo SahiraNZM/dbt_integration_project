@@ -1,5 +1,5 @@
 -- models/gold/gold_fact_sales.sql
-{{ config(materialized='table') }}
+{{ config(materialized='view') }}
 
 select
     sls_ord_num as order_id,

@@ -3,7 +3,7 @@
     tags = ['gold', 'customer']
 ) }}
 
--- Create unified customer dimension view
+-- Customer info
 with info as (
     select
         cst_id,
@@ -14,27 +14,30 @@ with info as (
     from {{ ref('stg_cust_info') }}
 ),
 
+-- Personal details
 personal as (
     select
-        cid,
+        regexp_replace(cid, '[^0-9]', '') as clean_cid,  -- remove letters & dashes
         bdate,
         gender as personal_gender
     from {{ ref('stg_cust_personal') }}
 ),
 
+-- Location details
 loc as (
     select
-        "CID" as cid,
-        "COUNTRY" as country
+        regexp_replace(cid, '[^0-9]', '') as clean_cid,
+        'trim(cntry)' as country
     from {{ ref('stg_cust_loc') }}
 )
 
+-- Final unified customer dimension
 select
-    row_number() over (order by i.cst_id) as customer_key,  -- surrogate key
+    row_number() over (order by i.cst_id) as customer_key,
     i.cst_id as customer_id,
     i.customer_firstname as first_name,
     i.customer_lastname as last_name,
-    
+
     -- Prefer gender from info, else fallback to personal
     case
         when i.info_gender is not null and i.info_gender not in ('', 'Unknown')
@@ -47,6 +50,6 @@ select
     l.country
 from info i
 left join personal p
-    on lower(i.cst_id) = lower(p.cid)  -- only if patterns match
+    on i.cst_id = p.clean_cid
 left join loc l
-    on lower(i.cst_id) = lower(l.cid)
+    on i.cst_id = l.clean_cid
