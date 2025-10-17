@@ -1,5 +1,5 @@
 -- models/gold/gold_dim_product.sql
-{{ config(materialized='table') }}
+{{ config(materialized='view') }}
 
 with prod as (
     select
