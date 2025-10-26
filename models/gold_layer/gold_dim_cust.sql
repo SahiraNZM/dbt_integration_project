@@ -27,7 +27,7 @@ personal as (
 loc as (
     select
         regexp_replace(cid, '[^0-9]', '') as clean_cid,
-        'trim(cntry)' as country
+        COUNTRY as country
     from {{ ref('stg_cust_loc') }}
 )
 

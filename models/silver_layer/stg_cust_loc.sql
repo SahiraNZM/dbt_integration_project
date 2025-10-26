@@ -1,20 +1,18 @@
 {{ config(materialized='table') }}
 
--- Step 1: Deduplicate using the macro
+-- Step 1: Deduplicate records
 with deduped as (
-    {{ remove_duplicates(ref('cust_personal'), 'CID', 'BDATE') }}
+    {{ remove_duplicates(ref('cust_loc'), 'CID', 'CID') }}
 ),
 
--- Step 2: Clean and standardize gender
-gender_standardized as (
-    {{ standardize_gender('deduped', 'GEN') }}
+-- Step 2: Standardize country names
+cleaned as (
+    select
+        trim(CID) as cid,
+        upper(trim(CNTRY)) as country
+    from deduped
+    where CID is not null
+      and CNTRY is not null
 )
 
-select
-    trim(CID) as cid,
-    BDATE as birthdate,
-    Gender
-from gender_standardized
-where CID is not null
-  and BDATE is not null
-  and GEN is not null
+select * from cleaned
