@@ -16,3 +16,91 @@ sources:
       - name: cust_info
       - name: prd_info
       - name: sales_details
+
+models:
+  - name: cust_details
+    description: "CRM customer information (raw bronze layer)"
+    columns:
+      - name: CST_ID
+        description: "Unique customer ID"
+        tests: [not_null, unique]
+
+      - name: CST_FIRSTNAME
+        description: "Customer first name"
+        tests: [not_null]
+
+      - name: CST_LASTNAME
+        description: "Customer last name"
+        tests: [not_null]
+
+      - name: CST_MARITAL_STATUS
+        description: "Customer marital status (S/M etc.)"
+        tests:
+          - accepted_values:
+              values: ['S', 'M', 'Single', 'Married']
+
+      - name: CST_GNDR
+        description: "Customer gender code"
+        tests:
+          - accepted_values:
+              values: ['M', 'F', 'Male', 'Female', 'Unknown']
+
+  - name: cust_loc
+    description: "ERP customer location table"
+    columns:
+      - name: CID
+        description: "Customer location ID"
+        tests: [not_null, unique]
+      - name: CNTRY
+        description: "Country name"
+        tests: [not_null]
+
+  - name: cust_personal
+    description: "ERP personal details of customers"
+    columns:
+      - name: CID
+        description: "Customer ID in ERP"
+        tests: [not_null, unique]
+      - name: BDATE
+        description: "Birthdate"
+        tests: [not_null, no_future_dates]
+      - name: GEN
+        description: "Gender field"
+        tests:
+          - accepted_values:
+              values: ['M', 'F', 'Male', 'Female', 'Unknown']
+
+  - name: prod_category
+    description: "ERP product category table"
+    columns:
+      - name: ID
+        tests: [not_null, unique]
+      - name: MAINTENANCE
+        description: "Maintenance flag"
+        tests:
+          - accepted_values:
+              values: ['Yes', 'No', 'YES', 'NO']
+
+  - name: prod_details
+    description: "CRM product details table"
+    columns:
+      - name: PRD_ID
+        tests: [not_null, unique]
+      - name: PRD_COST
+        tests:
+          - not_null
+          - positive_values
+      - name: PRD_START_DT
+        tests: [no_future_dates]
+
+  - name: sales_details_bronze
+    description: "CRM sales details data (raw bronze)"
+    columns:
+      - name: SLS_ORD_NUM
+        tests: [not_null, unique]
+      - name: SLS_SALES
+        tests:
+          - not_null
+          - positive_values
+      - name: SLS_ORDER_DT
+        tests: [no_future_dates]

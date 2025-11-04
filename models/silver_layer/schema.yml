@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: stg_cust_info
+    description: Cleaned and standardized customer info
+    columns:
+      - name: CST_ID
+        tests:
+          - not_null
+          - unique
+      - name: GENDER
+        tests:
+          - accepted_values:
+              values: ['Male', 'Female', 'Unknown']
+      - name: MARITAL_STATUS
+        tests:
+          - accepted_values:
+              values: ['Married', 'Single', 'Divorced', 'Widowed', 'Unknown']
+
+  - name: stg_cust_loc
+  
+    description: "Cleaned and standardized customer location data"
+    columns:
+      - name: CID
+        tests:
+          - not_null
+          - unique
+      - name: COUNTRY
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "upper(trim(COUNTRY)) not in ('UNKNOWN', 'N/A', '-')"
+
+  - name: stg_cust_personal
+    columns:
+      - name: CID
+        tests:
+          - not_null
+          - unique
+      - name: GENDER
+        tests:
+          - accepted_values:
+              values: ['Male', 'Female']
+
+  - name: stg_prod_category
+    columns:
+      - name: ID
+        tests:
+          - not_null
+          - unique
+      - name: MAINTENANCE
+        tests:
+          - accepted_values:
+              values: ['YES', 'NO', 'Unknown']
+
+  - name: stg_prod_details
+    columns:
+      - name: PRD_ID
+        tests:
+          - not_null
+          - unique
+      - name: PRD_COST
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "PRD_COST >= 0"
+
+  - name: stg_sales_details
+    columns:
+      - name: SLS_ORD_NUM
+        tests:
+          - not_null
+      - name: SLS_QUANTITY
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "SLS_QUANTITY > 0"
+      - name: SLS_PRICE
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "SLS_PRICE > 0"
